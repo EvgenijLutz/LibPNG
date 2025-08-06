@@ -1,5 +1,5 @@
 # LibPNGFramework
-Precompiled libpng library for all Apple platforms and architectures, including simulators.
+Precompiled [libpng](https://github.com/pnggroup/libpng) library for all Apple platforms and architectures, including simulators.
 
 ## Installing LibPNGFramework
 
