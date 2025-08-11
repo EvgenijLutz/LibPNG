@@ -4,6 +4,10 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>ios-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+		</data>
 		<key>ios-arm64/Headers/png.h</key>
 		<data>
 		1+u09880NJnp3zVpJ0vHSgTnORk=
@@ -18,7 +22,11 @@
 		</data>
 		<key>ios-arm64/libpng16.a</key>
 		<data>
-		Brblmcy4KBJjz1py+BsPJ+2feWM=
+		zAxz9sQldxAKDsG7kepF7Cm7p/w=
+		</data>
+		<key>ios-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Headers/png.h</key>
 		<data>
@@ -34,7 +42,11 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/libpng16.a</key>
 		<data>
-		xbz0r2aPMi8lejKwFsKaVlPoJSc=
+		2qgb9jd7ZloYaIRic/4Psi7lv8s=
+		</data>
+		<key>macos-arm64_x86_64/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>macos-arm64_x86_64/Headers/png.h</key>
 		<data>
@@ -50,7 +62,11 @@
 		</data>
 		<key>macos-arm64_x86_64/libpng16.a</key>
 		<data>
-		efbo13dI5T0qaMenAPJ3csa6ta0=
+		5d9vOXuIv5331OQ95TrnCcatJXg=
+		</data>
+		<key>tvos-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>tvos-arm64/Headers/png.h</key>
 		<data>
@@ -66,7 +82,11 @@
 		</data>
 		<key>tvos-arm64/libpng16.a</key>
 		<data>
-		Ui7SoJgDbXsw/GEgIlyjSfNn+6c=
+		sBDEAf0ugNppCZomTZMZ+81Z1E0=
+		</data>
+		<key>tvos-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>tvos-arm64_x86_64-simulator/Headers/png.h</key>
 		<data>
@@ -82,7 +102,11 @@
 		</data>
 		<key>tvos-arm64_x86_64-simulator/libpng16.a</key>
 		<data>
-		Tj7nuhJOEl4jsLLVitZDCCyYLJE=
+		WWMWulXHjJlLIIJbfnGnWvyWDPs=
+		</data>
+		<key>watchos-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>watchos-arm64/Headers/png.h</key>
 		<data>
@@ -98,7 +122,11 @@
 		</data>
 		<key>watchos-arm64/libpng16.a</key>
 		<data>
-		8p3SaMcypqb4ybpppSmtrxBtbAM=
+		ogujpSELPWpLiZq7YVwVARpeffM=
+		</data>
+		<key>watchos-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>watchos-arm64_x86_64-simulator/Headers/png.h</key>
 		<data>
@@ -114,7 +142,11 @@
 		</data>
 		<key>watchos-arm64_x86_64-simulator/libpng16.a</key>
 		<data>
-		rkT8/tbj5VX0FrQPmiHjNRw2KTE=
+		23JJwdz7/wQTHIxA2YLebH97qnk=
+		</data>
+		<key>xros-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>xros-arm64/Headers/png.h</key>
 		<data>
@@ -130,7 +162,11 @@
 		</data>
 		<key>xros-arm64/libpng16.a</key>
 		<data>
-		Stff6MDdQ8pEemLKnGtEjADiqAE=
+		AUOXS7nML3G1h9ahZ7fTek+qGpc=
+		</data>
+		<key>xros-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<data>
+		F2XrEyJ4GLjLvbhGte+r7WDp7h8=
 		</data>
 		<key>xros-arm64_x86_64-simulator/Headers/png.h</key>
 		<data>
@@ -146,11 +182,22 @@
 		</data>
 		<key>xros-arm64_x86_64-simulator/libpng16.a</key>
 		<data>
-		gKTqpxZz69PjRjAudmd3S/OHvK4=
+		6Rkz6ET6jd5cn2OPDZisoxlnAL8=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>ios-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
+			</data>
+		</dict>
 		<key>ios-arm64/Headers/png.h</key>
 		<dict>
 			<key>hash</key>
@@ -188,11 +235,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Brblmcy4KBJjz1py+BsPJ+2feWM=
+			zAxz9sQldxAKDsG7kepF7Cm7p/w=
 			</data>
 			<key>hash2</key>
 			<data>
-			lc9xX+KKVG3YnjukvlJlq4Z8tGCcpBTSeijzjmLFWYc=
+			7c3hHnkPFX5Z/pT4FNnBRFHc+ZtHWVOCWtVAFQh0XCc=
+			</data>
+		</dict>
+		<key>ios-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Headers/png.h</key>
@@ -232,11 +290,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			xbz0r2aPMi8lejKwFsKaVlPoJSc=
+			2qgb9jd7ZloYaIRic/4Psi7lv8s=
 			</data>
 			<key>hash2</key>
 			<data>
-			STZaa7dn7ReNmq1j/XkOI4iGVNEMNQcXMIJYPGPMB/4=
+			7ap6dI6MIHmbPvgAMO4PfJOhX2HrkE9hzv2gYOQoHLA=
+			</data>
+		</dict>
+		<key>macos-arm64_x86_64/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>macos-arm64_x86_64/Headers/png.h</key>
@@ -276,11 +345,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			efbo13dI5T0qaMenAPJ3csa6ta0=
+			5d9vOXuIv5331OQ95TrnCcatJXg=
 			</data>
 			<key>hash2</key>
 			<data>
-			fDRQ6LiJypu9cLgcGAPW2Hh3uA9OYzrs+NuyKmPgxN0=
+			sdbbuwZC7kZHTjx85zymvS0FD7/ZoTsCEqRTgiVNgqY=
+			</data>
+		</dict>
+		<key>tvos-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>tvos-arm64/Headers/png.h</key>
@@ -320,11 +400,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Ui7SoJgDbXsw/GEgIlyjSfNn+6c=
+			sBDEAf0ugNppCZomTZMZ+81Z1E0=
 			</data>
 			<key>hash2</key>
 			<data>
-			XabQzDM5DP1Ec1tYqjqWSyocLY5gy0mhhQxYGJd1FgQ=
+			sXhIjgMx8X3yT3t6hKrOLw/Z9g4vIBEdabG12M5w1LA=
+			</data>
+		</dict>
+		<key>tvos-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>tvos-arm64_x86_64-simulator/Headers/png.h</key>
@@ -364,11 +455,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Tj7nuhJOEl4jsLLVitZDCCyYLJE=
+			WWMWulXHjJlLIIJbfnGnWvyWDPs=
 			</data>
 			<key>hash2</key>
 			<data>
-			hpar/Nn2SwlWZrAGVphEk8Vq/wU9wTiSJlqVBW3EjtI=
+			/wFFWa/f8R2KWtX4Iupx/3/GTT71Jm3zLnVmpTyPUpI=
+			</data>
+		</dict>
+		<key>watchos-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>watchos-arm64/Headers/png.h</key>
@@ -408,11 +510,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			8p3SaMcypqb4ybpppSmtrxBtbAM=
+			ogujpSELPWpLiZq7YVwVARpeffM=
 			</data>
 			<key>hash2</key>
 			<data>
-			Uou34ir9HIVNzYO/kX3v2PsehJHmRe7wHcCUhhFN9DQ=
+			Y2LsZZTPeQMYCB1GubYMZJCtqEVj8ZJcxoBKSTKyZhM=
+			</data>
+		</dict>
+		<key>watchos-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>watchos-arm64_x86_64-simulator/Headers/png.h</key>
@@ -452,11 +565,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			rkT8/tbj5VX0FrQPmiHjNRw2KTE=
+			23JJwdz7/wQTHIxA2YLebH97qnk=
 			</data>
 			<key>hash2</key>
 			<data>
-			ONLpP1IwGA+p2jBYdlKMPISjCOH4DuePSjKr59ugCtE=
+			ZKGtqTQh78weIMNHJWbQ9P1OTALCv9qjHjJsdxAa3BI=
+			</data>
+		</dict>
+		<key>xros-arm64/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>xros-arm64/Headers/png.h</key>
@@ -496,11 +620,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Stff6MDdQ8pEemLKnGtEjADiqAE=
+			AUOXS7nML3G1h9ahZ7fTek+qGpc=
 			</data>
 			<key>hash2</key>
 			<data>
-			siYTk0WmOmt6vGBn3IGxH7UpqctLpkGLUQOGmeKeSM0=
+			mWHLVnamsSIScJR9yuyxTkQxgdaqSC75sx6U+xwrWa8=
+			</data>
+		</dict>
+		<key>xros-arm64_x86_64-simulator/Headers/LibPNG-Module/module.modulemap</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F2XrEyJ4GLjLvbhGte+r7WDp7h8=
+			</data>
+			<key>hash2</key>
+			<data>
+			wJmmxSjA5PmEtI4BIyc6dpFmkJ3/YaGuGiLt40SZkgY=
 			</data>
 		</dict>
 		<key>xros-arm64_x86_64-simulator/Headers/png.h</key>
@@ -540,11 +675,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			gKTqpxZz69PjRjAudmd3S/OHvK4=
+			6Rkz6ET6jd5cn2OPDZisoxlnAL8=
 			</data>
 			<key>hash2</key>
 			<data>
-			hxC3OprKkdhZaBKsoT12t332ppgcu71gUZayy23p8BE=
+			pOuu99O9DXcOQx/dGoJuw4PxS10cZBUebiT12MA17Fw=
 			</data>
 		</dict>
 	</dict>

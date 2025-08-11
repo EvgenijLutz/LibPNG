@@ -7,11 +7,11 @@
 ft_developer="/Applications/Xcode.app/Contents/Developer"
 libname=libpng16
 # Your signing identity to sign the xcframework. Execute "security find-identity -v -p codesigning" and select one from the list
-identity=YOUR_SIGNING_IDENTITY
+identity=B42A10624E8E06BC95CD03069100C6E67121D61B
 
 
 # Remove logs if exist
-rm -f "build-apple/log.txt"
+# rm -f "build-apple/log.txt"
 
 
 exit_if_error() {
@@ -33,7 +33,7 @@ build_library() {
 
   export CC="$ft_developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
   export LT_SYS_LIBRARY_PATH="-isysroot $sysroot/usr/include"
-  export CFLAGS="-isysroot $sysroot -arch $arch -std=c17 -mtargetos=$min_os -Os"
+  export CFLAGS="-isysroot $sysroot -arch $arch -std=c17 -mtargetos=$min_os -O2"
   export CPPFLAGS="-I$sysroot/usr/include"
   # Are we sure that we need to specify the architecture for the linker?
   export LDFLAGS="-arch $arch"
@@ -62,10 +62,18 @@ build_library() {
   # Install
   make install
   exit_if_error
+
+  # About modules
+  # https://clang.llvm.org/docs/Modules.html
+  # Without module.modulemap LibPNG is not exposed to Swift
+  # Copy the module map into the directory with installed header files
+  mkdir -p build-apple/$platform/$arch/include/$libname/LibPNG-Module
+  cp module.modulemap build-apple/$platform/$arch/include/$libname/LibPNG-Module/module.modulemap
+  exit_if_error
 }
 
-build_library MacOSX arm64     arm-apple-darwin    macos11
-build_library MacOSX x86_64    x86_64-apple-darwin macos10.12
+build_library MacOSX arm64     arm-apple-darwin           macos11
+build_library MacOSX x86_64    x86_64-apple-darwin        macos10.12
 build_library iPhoneOS         arm64  arm-apple-darwin    ios12
 build_library iPhoneSimulator  arm64  arm-apple-darwin    ios14-simulator
 build_library iPhoneSimulator  x86_64 x86_64-apple-darwin ios12-simulator
