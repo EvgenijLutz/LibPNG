@@ -1,13 +1,42 @@
 # bash
 
+# LibPNG
+
+
+# LLVM cross-compile
+# https://llvm.org/docs/HowToCrossCompileLLVM.html
+
+
+# Target triplets and cross-compilation using Clang
+# https://clang.llvm.org/docs/CrossCompilation.html#target-triple
+
+
+# Build for Android using other build systems
+# https://developer.android.com/ndk/guides/other_build_systems
+
+
+# Binary Static Library Dependencies
+# https://github.com/swiftlang/swift-evolution/blob/main/proposals/0482-swiftpm-static-library-binary-target-non-apple-platforms.md
+
+
 # Get some help
 #./configure -help >> configure-help.txt
 
 # Define some global variables
 ft_developer="/Applications/Xcode.app/Contents/Developer"
+# Output library name. Determined by the build system. Try to change the name if possible in the future
 libname=libpng16
 # Your signing identity to sign the xcframework. Execute "security find-identity -v -p codesigning" and select one from the list
 identity=B42A10624E8E06BC95CD03069100C6E67121D61B
+
+# Android NDK path
+ndk_path="/Users/evgenij/Library/Android/sdk/ndk/29.0.13846066"
+
+
+# Console output formatting
+# https://stackoverflow.com/a/2924755
+bold=$(tput bold)
+normal=$(tput sgr0)
 
 
 # Remove logs if exist
@@ -26,17 +55,75 @@ exit_if_error() {
 build_library() {
   local platform=$1
   local arch=$2
-  local host=$3
-  local min_os=$4
+  local min_os=$3
 
-  local sysroot="$ft_developer/Platforms/$platform.platform/Developer/SDKs/$platform.sdk"
+  # Reset variables
+  export LT_SYS_LIBRARY_PATH=""
+  export AR=""
+  export CC=""
+  export AS=""
+  export CXX=""
+  export LD=""
+  export RANLIB=""
+  export STRIP=""
+  export CPPFLAGS=""
+  export CFLAGS=""
 
-  export CC="$ft_developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
-  export LT_SYS_LIBRARY_PATH="-isysroot $sysroot/usr/include"
-  export CFLAGS="-isysroot $sysroot -arch $arch -std=c17 -mtargetos=$min_os -O2"
-  export CPPFLAGS="-I$sysroot/usr/include"
+  # Determine host based on platform and architecture
+  # Apple
+  if [[ "$platform" == "MacOSX" ]] || \
+    [[ "$platform" == "iPhoneOS" ]] || [[ "$platform" == "iPhoneSimulator" ]] || \
+    [[ "$platform" == "AppleTVOS" ]] || [[ "$platform" == "AppleTVSimulator" ]] || \
+    [[ "$platform" == "WatchOS" ]] || [[ "$platform" == "WatchSimulator" ]] || \
+    [[ "$platform" == "XROS" ]] || [[ "$platform" == "XRSimulator" ]]; then
+    if   [[ "$arch" == "arm64" ]];  then local host="arm-apple-darwin"
+    elif [[ "$arch" == "x86_64" ]]; then local host="x86_64-apple-darwin"
+    fi
+
+    local sysroot="$ft_developer/Platforms/$platform.platform/Developer/SDKs/$platform.sdk"
+    local arch_flags="-arch $arch"
+    local target_os_flags="-mtargetos=$min_os"
+    export CC="$ft_developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+    export LT_SYS_LIBRARY_PATH="-isysroot $sysroot/usr/include"
+    export CPPFLAGS="-I$sysroot/usr/include"
+    export CFLAGS="-isysroot $sysroot $arch_flags -std=c17 $target_os_flags -O2"
+
+  # Android
+  elif [[ "$platform" == "Android" ]]; then
+    if   [[ "$arch" == "aarch64" ]];  then local host="aarch64-linux-android"
+    elif [[ "$arch" == "arm" ]];      then local host="arm-linux-androideabi"
+    elif [[ "$arch" == "i686" ]];     then local host="i686-linux-android"
+    elif [[ "$arch" == "riscv64" ]];  then local host="riscv64-linux-android"
+    elif [[ "$arch" == "x86_64" ]];   then local host="x86_64-linux-android"
+    fi
+
+    local sysroot="$ndk_path/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+    local arch_flags=""
+    local target_os_flags="--target=$host$min_os"
+    export LT_SYS_LIBRARY_PATH=""
+
+    local toolchain="$ndk_path/toolchains/llvm/prebuilt/darwin-x86_64"
+    export AR=$toolchain/bin/llvm-ar
+    export CC="$toolchain/bin/clang $target_os_flags"
+    export AS=$CC
+    export CXX="$toolchain/bin/clang++ $target_os_flags"
+    export LD=$toolchain/bin/ld
+    export RANLIB=$toolchain/bin/llvm-ranlib
+    export STRIP=$toolchain/bin/llvm-strip
+
+    export CPPFLAGS=""
+    export CFLAGS="-std=c17 -O2"
+
+  else
+    echo "Unknown platform $platform"
+    exit 1
+  fi
+
+  # Welcome message
+  echo "Build for ${bold}$platform $host${normal}"
+
   # Are we sure that we need to specify the architecture for the linker?
-  export LDFLAGS="-arch $arch"
+  export LDFLAGS="$arch_flags"
 
   # Clean previous setup and build if exists
   make clean
@@ -72,20 +159,28 @@ build_library() {
   exit_if_error
 }
 
-build_library MacOSX arm64     arm-apple-darwin           macos11
-build_library MacOSX x86_64    x86_64-apple-darwin        macos10.12
-build_library iPhoneOS         arm64  arm-apple-darwin    ios12
-build_library iPhoneSimulator  arm64  arm-apple-darwin    ios14-simulator
-build_library iPhoneSimulator  x86_64 x86_64-apple-darwin ios12-simulator
-build_library AppleTVOS        arm64  arm-apple-darwin    tvos12
-build_library AppleTVSimulator arm64  arm-apple-darwin    tvos12-simulator
-build_library AppleTVSimulator x86_64 x86_64-apple-darwin tvos12-simulator
-build_library WatchOS          arm64  arm-apple-darwin    watchos8
-build_library WatchSimulator   arm64  arm-apple-darwin    watchos8-simulator
-build_library WatchSimulator   x86_64 x86_64-apple-darwin watchos8-simulator
-build_library XROS             arm64  arm-apple-darwin    xros1
-build_library XRSimulator      arm64  arm-apple-darwin    xros1-simulator
-build_library XRSimulator      x86_64 x86_64-apple-darwin xros1-simulator
+# Build for Apple systems
+build_library MacOSX           arm64  macos11
+build_library MacOSX           x86_64 macos10.13
+build_library iPhoneOS         arm64  ios12
+build_library iPhoneSimulator  arm64  ios14-simulator
+build_library iPhoneSimulator  x86_64 ios12-simulator
+build_library AppleTVOS        arm64  tvos12
+build_library AppleTVSimulator arm64  tvos12-simulator
+build_library AppleTVSimulator x86_64 tvos12-simulator
+build_library WatchOS          arm64  watchos8
+build_library WatchSimulator   arm64  watchos8-simulator
+build_library WatchSimulator   x86_64 watchos8-simulator
+build_library XROS             arm64  xros1
+build_library XRSimulator      arm64  xros1-simulator
+build_library XRSimulator      x86_64 xros1-simulator
+
+# Build for Android
+build_library Android aarch64 21
+build_library Android arm     21
+build_library Android i686    21
+build_library Android riscv64 35
+build_library Android x86_64  21
 
 
 create_framework() {
@@ -152,3 +247,10 @@ create_framework() {
   exit_if_error
 }
 create_framework
+
+
+
+
+
+
+# Done!

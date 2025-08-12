@@ -1,7 +1,21 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+
+func libPNGTarget() -> Target {
+#if os(Android)
+    .binaryTarget(
+        name: "LibPNG",
+        path: "Binaries/LibPNG.artifactbundle"
+    )
+#else
+    .binaryTarget(
+        name: "LibPNG",
+        path: "Binaries/LibPNG.xcframework"
+    )
+#endif
+}
 
 let package = Package(
     name: "LibPNGFramework",
@@ -10,7 +24,8 @@ let package = Package(
         .iOS(.v12),
         .tvOS(.v12),
         .watchOS(.v8),
-        .visionOS(.v1)
+        .visionOS(.v1),
+        .custom("Android", versionString: "21")
     ],
     products: [
         .library(
@@ -27,10 +42,7 @@ let package = Package(
         ),
     ],
     targets: [
-        .binaryTarget(
-            name: "LibPNG",
-            path: "Binaries/LibPNG.xcframework"
-        ),
+        libPNGTarget(),
         .target(
             name: "LibPNGC",
             dependencies: [

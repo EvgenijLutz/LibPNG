@@ -1,0 +1,36 @@
+{
+	"schemaVersion": "1.0",
+	"artifacts": {
+		"LibPNG": {
+			"version": "1.6.50",
+			"type": "staticLibrary",
+			"variants": [
+				{
+					"path": "aarch64-linux-android/libpng16.a",
+					"supportedTriples": [ "aarch64-unknown-linux-android" ],
+					"staticLibraryMetadata": { "headerPaths": ["include"] }
+				},
+				{
+					"path": "arm-linux-androideabi/libpng16.a",
+					"supportedTriples": [ "arm-linux-androideabi" ],
+					"staticLibraryMetadata": { "headerPaths": ["include"] }
+				},
+				{
+					"path": "i686-linux-android/libpng16.a",
+					"supportedTriples": [ "i686-unknown-linux-android" ],
+					"staticLibraryMetadata": { "headerPaths": ["include"] }
+				},
+				{
+					"path": "riscv64-linux-android/libpng16.a",
+					"supportedTriples": [ "riscv64-unknown-linux-android" ],
+					"staticLibraryMetadata": { "headerPaths": ["include"] }
+				},
+				{
+					"path": "x86_64-linux-android/libpng16.a",
+					"supportedTriples": [ "x86_64-unknown-linux-android" ],
+					"staticLibraryMetadata": { "headerPaths": ["include"] }
+				}
+			]
+		},
+	}
+}
