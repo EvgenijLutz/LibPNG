@@ -4,47 +4,76 @@
 import PackageDescription
 
 let package = Package(
-    name: "LibPNGFramework",
+    name: "LibPNG",
+    // See the "Minimum Deployment Version for Reference Types Imported from C++":
+    // https://www.swift.org/documentation/cxx-interop/status/
     platforms: [
-        .macOS(.v10_13),
-        .iOS(.v12),
-        .tvOS(.v12),
-        .watchOS(.v8),
+        .macOS(.v14),
+        .iOS(.v17),
+        .tvOS(.v17),
+        .watchOS(.v10),
         .visionOS(.v1)
     ],
     products: [
+        //.library(
+        //    name: "LibPNGExamples",
+        //    targets: ["LibPNGExamples"]
+        //),
         .library(
-            name: "LibPNGFramework",
-            targets: ["LibPNGFramework"]
+            name: "LibPNG",
+            targets: ["LibPNG"]
         ),
         .library(
             name: "LibPNGC",
             targets: ["LibPNGC"]
         ),
         .library(
-            name: "LibPNG",
-            targets: ["LibPNG"]
+            name: "png",
+            targets: ["png"]
         ),
     ],
     targets: [
         .binaryTarget(
-            name: "LibPNG",
-            path: "Binaries/LibPNG.xcframework"
+            name: "png",
+            path: "Binaries/png.xcframework"
         ),
         .target(
             name: "LibPNGC",
             dependencies: [
-                .target(name: "LibPNG")
+                .target(name: "png")
+            ],
+            linkerSettings: [
+                // Links libz.tbd that comes with all Apple systems
+                .linkedLibrary("z"),
+                // Links libbz2.tbd that comes with all Apple systems
+                .linkedLibrary("bz2")
             ]
         ),
         .target(
-            name: "LibPNGFramework",
+            name: "LibPNG",
             dependencies: [
                 .target(name: "LibPNGC")
             ],
             swiftSettings: [
                 .interoperabilityMode(.Cxx)
             ]
-        ),
-    ]
+        )//,
+        //.target(
+        //    name: "LibPNGExamples",
+        //    dependencies: [
+        //        .target(name: "LibPNG")
+        //    ],
+        //    resources: [
+        //        .process("Resources/")
+        //    ],
+        //    swiftSettings: [
+        //        .interoperabilityMode(.Cxx),
+        //        //.unsafeFlags(["-parse-as-library"])
+        //    ]
+        //)
+    ],
+    // The libpng library was compiled using c17, so set it also here
+    cLanguageStandard: .c17,
+    // Also use c++20, we don't live in the stone age, but still not ready to accept c++23
+    cxxLanguageStandard: .cxx20
 )
