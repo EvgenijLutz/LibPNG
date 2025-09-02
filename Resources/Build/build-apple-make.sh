@@ -152,10 +152,10 @@ build_library() {
 
   # About modules
   # https://clang.llvm.org/docs/Modules.html
-  # Without module.modulemap LibPNG is not exposed to Swift
+  # Without module.modulemap png is not exposed to Swift
   # Copy the module map into the directory with installed header files
-  mkdir -p build-apple/$platform/$arch/include/$libname/LibPNG-Module
-  cp module.modulemap build-apple/$platform/$arch/include/$libname/LibPNG-Module/module.modulemap
+  mkdir -p build-apple/$platform/$arch/include/$libname/png-Module
+  cp module.modulemap build-apple/$platform/$arch/include/$libname/png-Module/module.modulemap
   exit_if_error
 }
 
@@ -185,7 +185,7 @@ build_library Android x86_64  21
 
 create_framework() {
   # Remove previously created framework if exists
-  rm -rf build-apple/LibPNG.xcframework
+  rm -rf build-apple/png.xcframework
   exit_if_error
 
   # Merge macOS arm and x86 binaries
@@ -239,11 +239,11 @@ create_framework() {
     -library build-apple/WatchSimulator/$libname.a      -headers build-apple/WatchSimulator/arm64/include/$libname \
     -library build-apple/XROS/arm64/lib/$libname.a      -headers build-apple/XROS/arm64/include/$libname \
     -library build-apple/XRSimulator/$libname.a         -headers build-apple/XRSimulator/arm64/include/$libname \
-    -output build-apple/LibPNG.xcframework
+    -output build-apple/png.xcframework
   exit_if_error
 
   # And sign the framework
-  codesign --timestamp -s $identity build-apple/LibPNG.xcframework
+  codesign --timestamp -s $identity build-apple/png.xcframework
   exit_if_error
 }
 create_framework

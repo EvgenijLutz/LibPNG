@@ -1,4 +1,4 @@
-module LibPNG {
+module png {
     header "../png.h"
 
     export *
