@@ -1,5 +1,0 @@
-module LibPNG {
-    header "../png.h"
-
-    export *
-}
