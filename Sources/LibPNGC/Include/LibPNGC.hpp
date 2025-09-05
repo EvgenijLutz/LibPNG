@@ -47,6 +47,9 @@ private:
     long _numComponents;
     long _bitsPerComponent;
     
+    //const char* nullable _iccData;
+    //long _iccDataLength;
+    
     
     friend GlamorousPNG* nonnull GlamorousPNGRetain(GlamorousPNG* nonnull png) SWIFT_RETURNS_RETAINED;
     friend void GlamorousPNGRelease(GlamorousPNG* nonnull png);
@@ -71,10 +74,13 @@ public:
     long getBitsPerPixel() const SWIFT_COMPUTED_PROPERTY { return _bitsPerComponent * _numComponents; }
     long getBitsPerRow() const SWIFT_COMPUTED_PROPERTY { return _bitsPerComponent * _numComponents * _width / 8; }
     
+    const char* nullable getICCPData() SWIFT_COMPUTED_PROPERTY;
+    long getICCPDataLength() SWIFT_COMPUTED_PROPERTY;
+    
 } SWIFT_SHARED_REFERENCE(GlamorousPNGRetain, GlamorousPNGRelease);
 
-GlamorousPNG* nonnull GlamorousPNGRetain(GlamorousPNG* nonnull png) SWIFT_RETURNS_RETAINED;
-void GlamorousPNGRelease(GlamorousPNG* nonnull png);
+//GlamorousPNG* nonnull GlamorousPNGRetain(GlamorousPNG* nonnull png) SWIFT_RETURNS_RETAINED;
+//void GlamorousPNGRelease(GlamorousPNG* nonnull png);
 
 [[nodiscard("Don't forget to release the object using GlamorousPNGRelease, darling")]]
 GlamorousPNG* nullable openGlamorousPNG(const char* nonnull path) SWIFT_RETURNS_RETAINED;

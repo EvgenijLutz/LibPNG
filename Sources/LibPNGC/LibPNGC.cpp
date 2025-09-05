@@ -34,6 +34,46 @@ GlamorousPNG::~GlamorousPNG() {
 }
 
 
+const char* nullable GlamorousPNG::getICCPData() {
+    png_charp name;
+    int compression_type;
+    png_bytep profile_data;
+    png_uint_32 profile_len;
+    auto result = png_get_iCCP(png, startInfo, &name, &compression_type, &profile_data, &profile_len);
+    if (result != PNG_INFO_iCCP) {
+        printf("Could not get iCCP chunk\n");
+        return nullptr;
+    }
+    
+    if (compression_type != PNG_COMPRESSION_TYPE_BASE) {
+        printf("Unsupported ICC compression type %d\n", compression_type);
+        return nullptr;
+    }
+    
+    return reinterpret_cast<char*>(profile_data);
+}
+
+
+long GlamorousPNG::getICCPDataLength() {
+    png_charp name;
+    int compression_type;
+    png_bytep profile_data;
+    png_uint_32 profile_len;
+    auto result = png_get_iCCP(png, startInfo, &name, &compression_type, &profile_data, &profile_len);
+    if (result != PNG_INFO_iCCP) {
+        //printf("Could not get iCCP chunk\n");
+        return 0;
+    }
+    
+    if (compression_type != PNG_COMPRESSION_TYPE_BASE) {
+        //printf("Unsupported ICC compression type %d\n", compression_type);
+        return 0;
+    }
+    
+    return static_cast<long>(profile_len);
+}
+
+
 GlamorousPNG* nonnull GlamorousPNGRetain(GlamorousPNG* nonnull png) {
     png->referenceCounter.fetch_add(1);
 }
@@ -62,6 +102,9 @@ int read_chunk_callback(png_struct* ptr, png_unknown_chunkp chunk) {
     //auto userInfo = png_get_user_chunk_ptr(ptr);
     printf("Chunk: %s\n", chunk->name);
     
+    // TODO: PNG CgBI Format
+    // https://theapplewiki.com/wiki/PNG_CgBI_Format
+    
     /* The unknown chunk structure contains your
      chunk data, along with similar data for any other
      unknown chunks: */
@@ -85,7 +128,7 @@ void read_row_callback(png_struct* ptr, png_uint_32 row, int pass) {
 
 
 GlamorousPNG* nullable openGlamorousPNG(const char* nonnull path) {
-    std::cout << "Hello, darling" << std::endl;
+    printf("Hello, darling\n");
     
     // Read the header of the file to check if it's really a png file
     auto file = fopen(path, "rb");
@@ -201,6 +244,9 @@ GlamorousPNG* nullable openGlamorousPNG(const char* nonnull path) {
     
     double gamma = -1.0;
     auto isGamma = png_get_gAMA(png, startInfo, &gamma) == PNG_INFO_gAMA;
+    if (isGamma) {
+        printf("Gamma: %f\n", gamma);
+    }
     
     //auto env = getenv("DISPLAY_GAMMA");
     
