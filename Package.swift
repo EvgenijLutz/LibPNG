@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -8,17 +8,14 @@ let package = Package(
     // See the "Minimum Deployment Version for Reference Types Imported from C++":
     // https://www.swift.org/documentation/cxx-interop/status/
     platforms: [
-        .macOS(.v14),
-        .iOS(.v17),
-        .tvOS(.v17),
-        .watchOS(.v10),
-        .visionOS(.v1)
+        .macOS(.v10_13),
+        .iOS(.v12),
+        .tvOS(.v12),
+        .watchOS(.v8),
+        .visionOS(.v1),
+        .custom("Android", versionString: "12.0")
     ],
     products: [
-        //.library(
-        //    name: "LibPNGExamples",
-        //    targets: ["LibPNGExamples"]
-        //),
         .library(
             name: "LibPNG",
             targets: ["LibPNG"]
@@ -36,11 +33,15 @@ let package = Package(
         .binaryTarget(
             name: "png",
             path: "Binaries/png.xcframework"
+            //path: "Binaries/png.artifactbundle"
         ),
         .target(
             name: "LibPNGC",
             dependencies: [
                 .target(name: "png")
+            ],
+            cxxSettings: [
+                .enableWarning("all")
             ],
             linkerSettings: [
                 // Links libz.tbd that comes with all Apple systems
@@ -55,23 +56,15 @@ let package = Package(
                 .target(name: "LibPNGC")
             ],
             swiftSettings: [
-                .interoperabilityMode(.Cxx)
+                .interoperabilityMode(.Cxx),
+                //.strictMemorySafety()
             ]
-        )//,
-        //.target(
-        //    name: "LibPNGExamples",
-        //    dependencies: [
-        //        .target(name: "LibPNG")
-        //    ],
-        //    resources: [
-        //        .process("Resources/")
-        //    ],
-        //    swiftSettings: [
-        //        .interoperabilityMode(.Cxx),
-        //        //.unsafeFlags(["-parse-as-library"])
-        //    ]
-        //)
+        )
     ],
+//    swiftLanguageVersions: [
+//        // C++ interoperability is supported in Swift 5.9 and above
+//        .version("5.9")
+//    ],
     // The libpng library was compiled using c17, so set it also here
     cLanguageStandard: .c17,
     // Also use c++20, we don't live in the stone age, but still not ready to accept c++23
