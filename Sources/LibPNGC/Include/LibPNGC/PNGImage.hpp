@@ -13,20 +13,20 @@
 #include <swift/bridging>
 
 
-#ifndef nullable
-#define nullable __nullable
+#ifndef png_nullable
+#define png_nullable __nullable
 #endif
 
-#ifndef nonnull
-#define nonnull __nonnull
+#ifndef png_nonnull
+#define png_nonnull __nonnull
 #endif
 
-#ifndef noescape
-#define noescape _LIBCPP_NOESCAPE
+#ifndef png_noescape
+#define png_noescape _LIBCPP_NOESCAPE
 #endif
 
-#ifndef lifetimebound
-#define lifetimebound _LIBCPP_LIFETIMEBOUND
+#ifndef png_lifetimebound
+#define png_lifetimebound _LIBCPP_LIFETIMEBOUND
 #endif
 
 
@@ -38,7 +38,7 @@ private:
     std::atomic<size_t> referenceCounter;
     
     /// Pixel buffer.
-    char* nonnull _contents;
+    char* png_nonnull _contents;
     long _width;
     long _height;
     long _numComponents;
@@ -47,29 +47,29 @@ private:
     bool _sRGB;
     float _gamma;
     
-    /*const*/ char* nullable _iccData;
+    /*const*/ char* png_nullable _iccData;
     long _iccDataLength;
     
     
-    friend PNGImage* nonnull PNGImageRetain(PNGImage* nonnull png) SWIFT_RETURNS_RETAINED;
-    friend void PNGImageRelease(PNGImage* nonnull png);
+    friend PNGImage* png_nonnull PNGImageRetain(PNGImage* png_nonnull png) SWIFT_RETURNS_RETAINED;
+    friend void PNGImageRelease(PNGImage* png_nonnull png);
     
-    PNGImage(char* nonnull contents,
+    PNGImage(char* png_nonnull contents,
              long width, long height,
              long numComponents, long bitsPerComponent,
              bool sRGB, float gamma,
-             char* nullable iccData, long iccDataLength);
+             char* png_nullable iccData, long iccDataLength);
     ~PNGImage();
     
     
 public:
     [[nodiscard("Don't forget to release the object using PNGImageRelease")]]
-    static PNGImage* nullable open(const char* nonnull path noescape) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(path:));
+    static PNGImage* png_nullable open(const char* png_nonnull path png_noescape) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(path:));
     
-    static bool checkIfPNG(const char* nonnull path noescape);
+    static bool checkIfPNG(const char* png_nonnull path png_noescape);
     
     //std::span<char> getData() lifetimebound SWIFT_COMPUTED_PROPERTY;
-    char* nonnull getContents() SWIFT_COMPUTED_PROPERTY { return _contents; }
+    char* png_nonnull getContents() SWIFT_COMPUTED_PROPERTY { return _contents; }
     long getDataSize() const SWIFT_COMPUTED_PROPERTY { return (_bitsPerComponent / 8) * _numComponents * _width * _height; }
     long getWidth() const SWIFT_COMPUTED_PROPERTY { return _width; }
     long getHeight() const SWIFT_COMPUTED_PROPERTY { return _height; }
@@ -81,7 +81,7 @@ public:
     bool getIsSRGB() const SWIFT_COMPUTED_PROPERTY { return _sRGB; }
     float getGamma() const SWIFT_COMPUTED_PROPERTY { return _gamma; }
     
-    const char* nullable getICCPData() SWIFT_NAME(_getICCPDataUnsafe()) { return _iccData; };
+    const char* png_nullable getICCPData() SWIFT_NAME(_getICCPDataUnsafe()) { return _iccData; };
     long getICCPDataLength() SWIFT_NAME(_getICCPDataLengthUnsafe()) { return _iccDataLength; };
 }
 SWIFT_PRIVATE_FILEID("LibPNG/LibPNG.swift")
