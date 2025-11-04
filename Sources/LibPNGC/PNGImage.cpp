@@ -12,11 +12,11 @@
 #include <iostream>
 
 
-PNGImage::PNGImage(char* png_nonnull contents,
+PNGImage::PNGImage(char* fn_nonnull contents,
                    long width, long height,
                    long numComponents, long bitsPerComponent,
                    bool sRGB, float gamma,
-                   char* png_nullable iccData, long iccDataLength):
+                   char* fn_nullable iccData, long iccDataLength):
 referenceCounter(1),
 _contents(contents),
 _width(width),
@@ -49,13 +49,13 @@ PNGImage::~PNGImage() {
 //}
 
 
-PNGImage* png_nonnull PNGImageRetain(PNGImage* png_nonnull png) {
+PNGImage* fn_nonnull PNGImageRetain(PNGImage* fn_nonnull png) {
     png->referenceCounter.fetch_add(1);
     return png;
 }
 
 
-void PNGImageRelease(PNGImage* png_nonnull png) {
+void PNGImageRelease(PNGImage* fn_nonnull png) {
     auto lastCount = png->referenceCounter.fetch_sub(1);
     if (lastCount == 1) {
         delete png;
@@ -103,7 +103,7 @@ void read_row_callback(png_struct* ptr, png_uint_32 row, int pass) {
 }
 
 
-PNGImage* png_nullable PNGImage::open(const char* png_nonnull path png_noescape) {
+PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) {
     printf("Hello, darling\n");
     
     // Read the header of the file to check if it's really a png file
@@ -275,7 +275,7 @@ PNGImage* png_nullable PNGImage::open(const char* png_nonnull path png_noescape)
 }
 
 
-bool PNGImage::checkIfPNG(const char* png_nonnull path png_noescape) {
+bool PNGImage::checkIfPNG(const char* fn_nonnull path fn_noescape) {
     // Sanity check
     if (path == nullptr) {
         printf("Could not check a file, since no path was specified\n");
