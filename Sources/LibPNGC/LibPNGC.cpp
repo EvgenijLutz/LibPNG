@@ -1,6 +1,6 @@
 //
 //  LibPNGC.cpp
-//  LibPNGFramework
+//  LibPNG
 //
 //  Created by Evgenij Lutz on 06.08.25.
 //

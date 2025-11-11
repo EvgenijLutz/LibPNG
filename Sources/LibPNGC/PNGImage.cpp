@@ -12,12 +12,12 @@
 #include <iostream>
 
 
-PNGImage::PNGImage(char* fn_nonnull contents,
+PNGImage::PNGImage(const char* fn_nonnull contents,
                    long width, long height,
                    long numComponents, long bitsPerComponent,
                    bool sRGB, float gamma,
                    char* fn_nullable iccData, long iccDataLength):
-referenceCounter(1),
+_referenceCounter(1),
 _contents(contents),
 _width(width),
 _height(height),
@@ -47,22 +47,6 @@ PNGImage::~PNGImage() {
 //std::span<char> PNGImage::getData() {
 //    return std::span(_data, (_bitsPerComponent / 8) * _numComponents * _width * _height);
 //}
-
-
-PNGImage* fn_nonnull PNGImageRetain(PNGImage* fn_nonnull png) {
-    png->referenceCounter.fetch_add(1);
-    return png;
-}
-
-
-void PNGImageRelease(PNGImage* fn_nonnull png) {
-    auto lastCount = png->referenceCounter.fetch_sub(1);
-    if (lastCount == 1) {
-        delete png;
-    }
-}
-
-
 
 
 void pngErrorCallback(png_structp, png_const_charp) {
@@ -303,3 +287,6 @@ bool PNGImage::checkIfPNG(const char* fn_nonnull path fn_noescape) {
     // It's a png file
     return true;
 }
+
+
+FN_IMPLEMENT_SWIFT_INTERFACE1(PNGImage)
