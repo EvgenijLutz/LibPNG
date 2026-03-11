@@ -231,12 +231,7 @@ PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) {
         else if (fabs(gamma - 0.454545455) < 0.001) {
             printf("Likely gamma corrected sRGB\n");
         }
-        
-        // TODO: Convert to linear color space
     }
-    
-    //auto env = getenv("DISPLAY_GAMMA");
-    
     
     // Determine number of color components
     auto numChannels = (int)png_get_channels(png, startInfo);

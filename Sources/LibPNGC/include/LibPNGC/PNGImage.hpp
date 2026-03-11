@@ -13,6 +13,8 @@
 /// Glamorously decompressed PNG image.
 ///
 /// "It takes a lot of money to look this cheap, darling."
+///
+/// - Note: This class is immutable, thus thread-safe.
 class PNGImage final {
 private:
     std::atomic<size_t> _referenceCounter;
@@ -47,7 +49,7 @@ public:
     /// Loads a png file at the specified `path`.
     ///
     /// - Returns: a valid ``PNGImage`` if the image was successfully loaded, otherwise false.
-    [[nodiscard("Don't forget to release the object using PNGImageRelease")]]
+    [[nodiscard("Don't forget to release the object using the PNGImageRelease function")]]
     static PNGImage* fn_nullable open(const char* fn_nonnull path fn_noescape) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(path:));
     
     //std::span<char> getData() lifetimebound SWIFT_COMPUTED_PROPERTY;

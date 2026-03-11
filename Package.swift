@@ -13,7 +13,7 @@ let package = Package(
         .tvOS(.v12),
         .watchOS(.v8),
         .visionOS(.v1),
-        .custom("Android", versionString: "12.0")
+        .custom("Android", versionString: "5.0")
     ],
     products: [
         .library(
@@ -30,11 +30,19 @@ let package = Package(
         ),
     ],
     targets: [
-        .binaryTarget(
-            name: "png",
-            path: "Binaries/png.xcframework"
-            //path: "Binaries/png.artifactbundle"
-        ),
+        {
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
+            .binaryTarget(
+                name: "png",
+                path: "Binaries/png.xcframework"
+            )
+#else
+            .binaryTarget(
+                name: "png",
+                path: "Binaries/png.artifactbundle"
+            )
+#endif
+        }(),
         .target(
             name: "LibPNGC",
             dependencies: [
@@ -44,10 +52,10 @@ let package = Package(
                 .enableWarning("all")
             ],
             linkerSettings: [
-                // Links libz.tbd that comes with all Apple systems
+                // Links libz.tbd that comes with all Apple and Android systems
                 .linkedLibrary("z"),
-                // Links libbz2.tbd that comes with all Apple systems
-                .linkedLibrary("bz2")
+                // Links libbz2.tbd that comes with all Apple systems, but not Android :(
+                .linkedLibrary("bz2", .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS]))
             ]
         ),
         .target(
@@ -61,10 +69,6 @@ let package = Package(
             ]
         )
     ],
-//    swiftLanguageVersions: [
-//        // C++ interoperability is supported in Swift 5.9 and above
-//        .version("5.9")
-//    ],
     // The libpng library was compiled using c17, so set it also here
     cLanguageStandard: .c17,
     // Also use c++20, we don't live in the stone age, but still not ready to accept c++23
