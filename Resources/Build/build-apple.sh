@@ -24,13 +24,16 @@
 
 # Define some global variables
 ft_developer="/Applications/Xcode.app/Contents/Developer"
-# Output library name. Determined by the build system. Try to change the name if possible in the future
-libname=libpng16
 # Your signing identity to sign the xcframework. Execute "security find-identity -v -p codesigning" and select one from the list
-identity=B42A10624E8E06BC95CD03069100C6E67121D61B
+identity=070BA25D98F2A17A61E3E27E31BE64C06F901016
 
 # Android NDK path
-ndk_path="/Users/evgenij/Library/Android/sdk/ndk/29.0.13846066"
+ndk_path="/Users/evgenij/Library/Android/sdk/ndk/29.0.14206865"
+
+
+# Output library name. Determined by the build system. Try to change the name if possible in the future
+libname=libpng16
+source_name=libpng-1.6.56
 
 
 # Console output formatting
@@ -40,7 +43,7 @@ normal=$(tput sgr0)
 
 
 # Remove logs if exist
-# rm -f "build-apple/log.txt"
+# rm -f "build/log.txt"
 
 
 exit_if_error() {
@@ -125,16 +128,18 @@ build_library() {
   # Are we sure that we need to specify the architecture for the linker?
   export LDFLAGS="$arch_flags"
 
-  # Clean previous setup and build if exists
-  make clean
-  exit_if_error
+  dir=$(pwd)
 
   # Remove previously build foler for the specified platform and architecture if exists
-  rm -f "build-apple/$platform/$arch"
+  rm -rf "build/$platform/$arch"
+
+  # Temporary directory
+  mkdir -p "build/$platform/$arch/tmp"
+  cd "build/$platform/$arch/tmp"
   
   # Configure for the specified platform and architecture
-  ./configure \
-    --prefix $(pwd)/build-apple/$platform/$arch \
+  sh ./../../../../$source_name/configure \
+    --prefix $dir/build/$platform/$arch/install \
     --host=$host \
     --enable-static=yes \
     --enable-shared=no \
@@ -142,20 +147,23 @@ build_library() {
     --disable-tools
   exit_if_error
 
-  # Build
-  make
+  # Build and install
+  make install -j$(sysctl -n hw.ncpu)
   exit_if_error
 
-  # Install
-  make install
+  # Go back
+  cd ../../../..
+
+  # Remove temporary data
+  rm -rf "build/$platform/$arch/tmp"
   exit_if_error
 
   # About modules
   # https://clang.llvm.org/docs/Modules.html
   # Without module.modulemap png is not exposed to Swift
   # Copy the module map into the directory with installed header files
-  mkdir -p build-apple/$platform/$arch/include/$libname/png-Module
-  cp module.modulemap build-apple/$platform/$arch/include/$libname/png-Module/module.modulemap
+  mkdir -p build/$platform/$arch/install/include/$libname/png-Module
+  cp Contents/module.modulemap build/$platform/$arch/install/include/$libname/png-Module/module.modulemap
   exit_if_error
 }
 
@@ -185,68 +193,119 @@ build_library Android x86_64  21
 
 create_framework() {
   # Remove previously created framework if exists
-  rm -rf build-apple/png.xcframework
+  rm -rf build/png.xcframework
   exit_if_error
 
   # Merge macOS arm and x86 binaries
-  mkdir -p build-apple/MacOSX
+  mkdir -p build/MacOSX
   exit_if_error
-  lipo -create -output build-apple/MacOSX/$libname.a \
-    build-apple/MacOSX/arm64/lib/$libname.a \
-    build-apple/MacOSX/x86_64/lib/$libname.a
+  lipo -create -output build/MacOSX/$libname.a \
+    build/MacOSX/arm64/install/lib/$libname.a \
+    build/MacOSX/x86_64/install/lib/$libname.a
   exit_if_error
 
   # Merge iOS simulator arm and x86 binaries
-  mkdir -p build-apple/iPhoneSimulator
+  mkdir -p build/iPhoneSimulator
   exit_if_error
-  lipo -create -output build-apple/iPhoneSimulator/$libname.a \
-    build-apple/iPhoneSimulator/arm64/lib/$libname.a \
-    build-apple/iPhoneSimulator/x86_64/lib/$libname.a
+  lipo -create -output build/iPhoneSimulator/$libname.a \
+    build/iPhoneSimulator/arm64/install/lib/$libname.a \
+    build/iPhoneSimulator/x86_64/install/lib/$libname.a
   exit_if_error
 
   # Merge tvOS simulator arm and x86 binaries
-  mkdir -p build-apple/AppleTVSimulator
+  mkdir -p build/AppleTVSimulator
   exit_if_error
-  lipo -create -output build-apple/AppleTVSimulator/$libname.a \
-    build-apple/AppleTVSimulator/arm64/lib/$libname.a \
-    build-apple/AppleTVSimulator/x86_64/lib/$libname.a
+  lipo -create -output build/AppleTVSimulator/$libname.a \
+    build/AppleTVSimulator/arm64/install/lib/$libname.a \
+    build/AppleTVSimulator/x86_64/install/lib/$libname.a
   exit_if_error
 
   # Merge watchOS simulator arm and x86 binaries
-  mkdir -p build-apple/WatchSimulator
+  mkdir -p build/WatchSimulator
   exit_if_error
-  lipo -create -output build-apple/WatchSimulator/$libname.a \
-    build-apple/WatchSimulator/arm64/lib/$libname.a \
-    build-apple/WatchSimulator/x86_64/lib/$libname.a
+  lipo -create -output build/WatchSimulator/$libname.a \
+    build/WatchSimulator/arm64/install/lib/$libname.a \
+    build/WatchSimulator/x86_64/install/lib/$libname.a
   exit_if_error
 
   # Merge visionOS simulator arm and x86 binaries
-  mkdir -p build-apple/XRSimulator
+  mkdir -p build/XRSimulator
   exit_if_error
-  lipo -create -output build-apple/XRSimulator/$libname.a \
-    build-apple/XRSimulator/arm64/lib/$libname.a \
-    build-apple/XRSimulator/x86_64/lib/$libname.a
+  lipo -create -output build/XRSimulator/$libname.a \
+    build/XRSimulator/arm64/install/lib/$libname.a \
+    build/XRSimulator/x86_64/install/lib/$libname.a
   exit_if_error
 
   # Create the framework with multiple platforms
   xcodebuild -create-xcframework \
-    -library build-apple/MacOSX/$libname.a              -headers build-apple/MacOSX/arm64/include/$libname \
-    -library build-apple/iPhoneOS/arm64/lib/$libname.a  -headers build-apple/iPhoneOS/arm64/include/$libname \
-    -library build-apple/iPhoneSimulator/$libname.a     -headers build-apple/iPhoneSimulator/arm64/include/$libname \
-    -library build-apple/AppleTVOS/arm64/lib/$libname.a -headers build-apple/AppleTVOS/arm64/include/$libname \
-    -library build-apple/AppleTVSimulator/$libname.a    -headers build-apple/AppleTVSimulator/arm64/include/$libname \
-    -library build-apple/WatchOS/arm64/lib/$libname.a   -headers build-apple/WatchOS/arm64/include/$libname \
-    -library build-apple/WatchSimulator/$libname.a      -headers build-apple/WatchSimulator/arm64/include/$libname \
-    -library build-apple/XROS/arm64/lib/$libname.a      -headers build-apple/XROS/arm64/include/$libname \
-    -library build-apple/XRSimulator/$libname.a         -headers build-apple/XRSimulator/arm64/include/$libname \
-    -output build-apple/png.xcframework
+    -library build/MacOSX/$libname.a              -headers build/MacOSX/arm64/install/include/$libname \
+    -library build/iPhoneOS/arm64/install/lib/$libname.a  -headers build/iPhoneOS/arm64/install/include/$libname \
+    -library build/iPhoneSimulator/$libname.a     -headers build/iPhoneSimulator/arm64/install/include/$libname \
+    -library build/AppleTVOS/arm64/install/lib/$libname.a -headers build/AppleTVOS/arm64/install/include/$libname \
+    -library build/AppleTVSimulator/$libname.a    -headers build/AppleTVSimulator/arm64/install/include/$libname \
+    -library build/WatchOS/arm64/install/lib/$libname.a   -headers build/WatchOS/arm64/install/include/$libname \
+    -library build/WatchSimulator/$libname.a      -headers build/WatchSimulator/arm64/install/include/$libname \
+    -library build/XROS/arm64/install/lib/$libname.a      -headers build/XROS/arm64/install/include/$libname \
+    -library build/XRSimulator/$libname.a         -headers build/XRSimulator/arm64/install/include/$libname \
+    -output build/png.xcframework
   exit_if_error
 
   # And sign the framework
-  codesign --timestamp -s $identity build-apple/png.xcframework
+  codesign --timestamp -s $identity build/png.xcframework
   exit_if_error
 }
 create_framework
+
+
+# Artifact bundle for Android
+create_artifactbundle() {
+  # Remove previously created artifact if exists
+  rm -rf build/png.artifactbundle
+  exit_if_error
+
+  # Create the artifact bundle folder
+  mkdir -p build/png.artifactbundle
+  exit_if_error
+
+  # info.json
+  cp Contents/info.json build/png.artifactbundle/info.json
+  exit_if_error
+
+  # Headers
+  cp -r build/Android/aarch64/install/include build/png.artifactbundle/include
+  exit_if_error
+
+  # aarch64-linux-android
+  mkdir -p build/png.artifactbundle/aarch64-linux-android
+  exit_if_error
+  cp build/Android/aarch64/install/lib/$libname.a build/png.artifactbundle/aarch64-linux-android/png.a
+  exit_if_error
+
+  # arm-linux-androideabi
+  mkdir -p build/png.artifactbundle/arm-linux-androideabi
+  exit_if_error
+  cp build/Android/arm/install/lib/$libname.a build/png.artifactbundle/arm-linux-androideabi/png.a
+  exit_if_error
+
+  # i686-linux-android
+  mkdir -p build/png.artifactbundle/i686-linux-android
+  exit_if_error
+  cp build/Android/i686/install/lib/$libname.a build/png.artifactbundle/i686-linux-android/png.a
+  exit_if_error
+
+  # riscv64-linux-android
+  mkdir -p build/png.artifactbundle/riscv64-linux-android
+  exit_if_error
+  cp build/Android/riscv64/install/lib/$libname.a build/png.artifactbundle/riscv64-linux-android/png.a
+  exit_if_error
+
+  # x86_64-linux-android
+  mkdir -p build/png.artifactbundle/x86_64-linux-android
+  exit_if_error
+  cp build/Android/x86_64/install/lib/$libname.a build/png.artifactbundle/x86_64-linux-android/png.a
+  exit_if_error
+}
+create_artifactbundle
 
 
 
