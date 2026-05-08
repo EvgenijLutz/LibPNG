@@ -6,7 +6,7 @@ Precompiled [libpng](https://github.com/pnggroup/libpng) library for all Apple p
 Add the following dependency to your Package.swift:
 
 ```Swift
-.package(url: "https://github.com/EvgenijLutz/LibPNG.git", from: "1.6.50-alpha3")
+.package(url: "https://github.com/EvgenijLutz/LibPNG.git", from: "1.6.58")
 ```
 
 And you're good to go!

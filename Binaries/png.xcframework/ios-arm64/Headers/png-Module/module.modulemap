@@ -1,5 +1,0 @@
-module png {
-    header "../png.h"
-
-    export *
-}

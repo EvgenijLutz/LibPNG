@@ -2,22 +2,7 @@
 
 # LibPNG
 
-
-# LLVM cross-compile
-# https://llvm.org/docs/HowToCrossCompileLLVM.html
-
-
-# Target triplets and cross-compilation using Clang
-# https://clang.llvm.org/docs/CrossCompilation.html#target-triple
-
-
-# Build for Android using other build systems
-# https://developer.android.com/ndk/guides/other_build_systems
-
-
-# Binary Static Library Dependencies
-# https://github.com/swiftlang/swift-evolution/blob/main/proposals/0482-swiftpm-static-library-binary-target-non-apple-platforms.md
-
+source common.sh
 
 # Get some help
 #./configure -help >> configure-help.txt
@@ -33,26 +18,11 @@ ndk_path="/Users/evgenij/Library/Android/sdk/ndk/29.0.14206865"
 
 # Output library name. Determined by the build system. Try to change the name if possible in the future
 libname=libpng16
-source_name=libpng-1.6.56
-
-
-# Console output formatting
-# https://stackoverflow.com/a/2924755
-bold=$(tput bold)
-normal=$(tput sgr0)
+source_name=libpng-1.6.58
 
 
 # Remove logs if exist
 # rm -f "build/log.txt"
-
-
-exit_if_error() {
-  local result=$?
-  if [ $result -ne 0 ] ; then
-     echo "Received an exit code $result, aborting"
-     exit 1
-  fi
-}
 
 
 build_library() {
@@ -162,9 +132,9 @@ build_library() {
   # https://clang.llvm.org/docs/Modules.html
   # Without module.modulemap png is not exposed to Swift
   # Copy the module map into the directory with installed header files
-  mkdir -p build/$platform/$arch/install/include/$libname/png-Module
-  cp Contents/module.modulemap build/$platform/$arch/install/include/$libname/png-Module/module.modulemap
-  exit_if_error
+  # mkdir -p build/$platform/$arch/install/include/$libname/png-Module
+  # cp Contents/module.modulemap build/$platform/$arch/install/include/$libname/png-Module/module.modulemap
+  # exit_if_error
 }
 
 # Build for Apple systems
