@@ -86,20 +86,77 @@ void read_row_callback(png_struct* ptr, png_uint_32 row, int pass) {
     // update progress meter
 }
 
-
-PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) {
-    printf("Hello, darling\n");
+struct BufferReader {
+    bool usePath = false;
     
-    // Read the header of the file to check if it's really a png file
-    auto file = fopen(path, "rb");
-    if (file == nullptr) {
-        return nullptr;
+    FILE* file = nullptr;
+    
+    const void* data = nullptr;
+    long size = 0;
+    long offset = 0;
+    
+    void close() {
+        if (usePath && file) {
+            std::fclose(file);
+            file = nullptr;
+        }
     }
     
+    bool read(void* dst, long numBytes) {
+        if (usePath) {
+            std::fread(dst, numBytes, 1, file);
+        }
+        else {
+            const png_byte* png_src = reinterpret_cast<const png_byte*>(data) + offset;
+            std::memcpy(dst, png_src, numBytes);
+            offset += numBytes;
+        }
+        
+        return true;
+    }
+    
+    static void ReadDataFromInputStream(png_structp png_ptr, png_byte* raw_data, png_size_t read_length) {
+        BufferReader* handle = (BufferReader*)png_get_io_ptr(png_ptr);
+        handle->read(raw_data, read_length);
+    }
+    
+    
+    bool initWithPath(const char* fn_nonnull path) {
+        usePath = true;
+        
+        // Read the header of the file to check if it's really a png file
+        file = std::fopen(path, "rb");
+        if (file == nullptr) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    void initWithBuffer(const void* fn_nonnull buffer, long bufferSize) {
+        usePath = false;
+        data = buffer;
+        size = bufferSize;
+    }
+};
+
+
+PNGImage* fn_nullable PNGImage::_open(const _LoadInfo& info) {
+    auto reader = BufferReader();
+    if (info.usePath) {
+        if (reader.initWithPath(info.path) == false) {
+            return nullptr;
+        }
+    }
+    else {
+        reader.initWithBuffer(info.buffer, info.bufferSize);
+    }
+    
+    // Read the header of the file to check if it's really a png file
     // Compare PNG signature
     png_byte header[8];
     auto headerSize = static_cast<int>(sizeof(header));
-    fread(header, headerSize, 1, file);
+    reader.read(header, headerSize);
     if (png_sig_cmp(header, 0, headerSize)) {
         printf("Wrong PNG signature\n");
         return nullptr;
@@ -134,13 +191,18 @@ PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) {
     if (setjmp(png_jmpbuf(png))) {
         printf("Encountered an error, abort\n");
         png_destroy_read_struct(&png, &startInfo, &endInfo);
-        fclose(file);
+        reader.close();
         return nullptr;
     }
     
     
     // Setup png reading
-    png_init_io(png, file);
+    if (info.usePath) {
+        png_init_io(png, reader.file);
+    }
+    else {
+        png_set_read_fn(png, &reader, BufferReader::ReadDataFromInputStream);
+    }
     
     
     // We've read the header previously
@@ -158,8 +220,9 @@ PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) {
     // Read the whole png file into memory
     png_read_png(png, startInfo, PNG_TRANSFORM_IDENTITY, nullptr);
     
-    // Close the file
-    fclose(file);
+    
+    // Close the reader
+    reader.close();
     
     
     // Get png data
@@ -254,6 +317,51 @@ PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) {
 }
 
 
+PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) SWIFT_RETURNS_RETAINED {
+    return _open({
+        .usePath = true,
+        .path = path
+    });
+}
+
+
+PNGImage* fn_nullable PNGImage::open(const void* fn_nonnull buffer fn_noescape, long bufferSize) SWIFT_RETURNS_RETAINED {
+    return _open({
+        .usePath = false,
+        .buffer = buffer,
+        .bufferSize = bufferSize
+    });
+}
+
+
+bool PNGImage::_checkIfPNG(const _LoadInfo& info) {
+    auto reader = BufferReader();
+    if (info.usePath) {
+        if (reader.initWithPath(info.path) == false) {
+            return false;
+        }
+    }
+    else {
+        reader.initWithBuffer(info.buffer, info.bufferSize);
+    }
+    
+    // Compare PNG signature
+    png_byte header[8];
+    auto headerSize = static_cast<int>(sizeof(header));
+    reader.read(header, headerSize);
+    if (png_sig_cmp(header, 0, headerSize)) {
+        reader.close();
+        return false;
+    }
+    
+    // Close the file
+    reader.close();
+    
+    // It's a png file
+    return true;
+}
+
+
 bool PNGImage::checkIfPNG(const char* fn_nonnull path fn_noescape) {
     // Sanity check
     if (path == nullptr) {
@@ -261,26 +369,19 @@ bool PNGImage::checkIfPNG(const char* fn_nonnull path fn_noescape) {
         return false;
     }
     
-    // Read the header of the file to check if it's really a png file
-    auto file = fopen(path, "rb");
-    if (file == nullptr) {
-        printf("Could not check a file, since if was not found at path \"%s\"\n", path);
-        return false;
-    }
-    
-    // Compare PNG signature
-    png_byte header[8];
-    auto headerSize = static_cast<int>(sizeof(header));
-    fread(header, headerSize, 1, file);
-    if (png_sig_cmp(header, 0, headerSize)) {
-        return false;
-    }
-    
-    // Close the file
-    fclose(file);
-    
-    // It's a png file
-    return true;
+    return _checkIfPNG({
+        .usePath = true,
+        .path = path
+    });
+}
+
+
+bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape, long bufferSize) {
+    return _checkIfPNG({
+        .usePath = false,
+        .buffer = buffer,
+        .bufferSize = bufferSize
+    });
 }
 
 

@@ -41,16 +41,31 @@ private:
              char* fn_nullable iccData, long iccDataLength);
     ~PNGImage();
     
+    struct _LoadInfo {
+        bool usePath;
+        union {
+            const char* fn_nonnull path;
+            struct {
+                const void* fn_nonnull buffer;
+                long bufferSize;
+            };
+        };
+    };
+    static bool _checkIfPNG(const _LoadInfo& info);
+    static PNGImage* fn_nullable _open(const _LoadInfo& info) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(path:));
+    
     
 public:
     /// Checks if a file at the specified `path` is a `png` image.
     static bool checkIfPNG(const char* fn_nonnull path fn_noescape);
+    static bool checkIfPNG(const void* fn_nonnull buffer fn_noescape, long bufferSize);
     
     /// Loads a png file at the specified `path`.
     ///
     /// - Returns: a valid ``PNGImage`` if the image was successfully loaded, otherwise false.
     [[nodiscard("Don't forget to release the object using the PNGImageRelease function")]]
     static PNGImage* fn_nullable open(const char* fn_nonnull path fn_noescape) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(path:));
+    static PNGImage* fn_nullable open(const void* fn_nonnull buffer fn_noescape, long bufferSize) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(buffer:size:));
     
     //std::span<char> getData() lifetimebound SWIFT_COMPUTED_PROPERTY;
     const char* fn_nonnull getContents() fn_lifetimebound SWIFT_COMPUTED_PROPERTY { return _contents; }

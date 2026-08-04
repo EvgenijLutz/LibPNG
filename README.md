@@ -1,6 +1,8 @@
 # LibPNG
 Precompiled [libpng](https://github.com/pnggroup/libpng) library for all Apple platforms and architectures, including simulators.
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FEvgenijLutz%2FLibPNG%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/EvgenijLutz/LibPNG) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FEvgenijLutz%2FLibPNG%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/EvgenijLutz/LibPNG)
+
 ## Installing LibPNG
 
 Add the following dependency to your Package.swift:
