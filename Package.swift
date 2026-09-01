@@ -34,15 +34,9 @@ let package = Package(
     targets: [
         {
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-            .binaryTarget(
-                name: "png",
-                path: "Binaries/png.xcframework"
-            )
+            .binaryTarget(name: "png", path: "Binaries/png.xcframework")
 #else
-            .binaryTarget(
-                name: "png",
-                path: "Binaries/png.artifactbundle"
-            )
+            .binaryTarget(name: "png", path: "Binaries/png.artifactbundle")
 #endif
         }(),
         .target(

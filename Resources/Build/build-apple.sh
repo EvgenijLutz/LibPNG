@@ -7,15 +7,6 @@ source common.sh
 # Get some help
 #./configure -help >> configure-help.txt
 
-# Define some global variables
-ft_developer="/Applications/Xcode.app/Contents/Developer"
-# Your signing identity to sign the xcframework. Execute "security find-identity -v -p codesigning" and select one from the list
-identity=070BA25D98F2A17A61E3E27E31BE64C06F901016
-
-# Android NDK path
-ndk_path="/Users/evgenij/Library/Android/sdk/ndk/29.0.14206865"
-
-
 # Output library name. Determined by the build system. Try to change the name if possible in the future
 libname=libpng16
 source_name=libpng-1.6.58
@@ -42,17 +33,13 @@ build_library() {
   export CPPFLAGS=""
   export CFLAGS=""
 
-  # Determine host based on platform and architecture
-  # Apple
-  if [[ "$platform" == "MacOSX" ]] || \
-    [[ "$platform" == "iPhoneOS" ]] || [[ "$platform" == "iPhoneSimulator" ]] || \
-    [[ "$platform" == "AppleTVOS" ]] || [[ "$platform" == "AppleTVSimulator" ]] || \
-    [[ "$platform" == "WatchOS" ]] || [[ "$platform" == "WatchSimulator" ]] || \
-    [[ "$platform" == "XROS" ]] || [[ "$platform" == "XRSimulator" ]]; then
-    if   [[ "$arch" == "arm64" ]];  then local host="arm-apple-darwin"
-    elif [[ "$arch" == "x86_64" ]]; then local host="x86_64-apple-darwin"
-    fi
+  # Determine host (arm-apple-darwin, aarch64-linux-android and other) and target system (Apple or Android)
+  set_target_system_var $platform
+  set_host_var $platform $arch
 
+  # Determine some compiler flags
+  # Apple
+  if [[ "$target_system" == "Apple" ]]; then
     local sysroot="$ft_developer/Platforms/$platform.platform/Developer/SDKs/$platform.sdk"
     local arch_flags="-arch $arch"
     local target_os_flags="-mtargetos=$min_os"
@@ -62,14 +49,7 @@ build_library() {
     export CFLAGS="-isysroot $sysroot $arch_flags -std=c17 $target_os_flags -O2"
 
   # Android
-  elif [[ "$platform" == "Android" ]]; then
-    if   [[ "$arch" == "aarch64" ]];  then local host="aarch64-linux-android"
-    elif [[ "$arch" == "arm" ]];      then local host="arm-linux-androideabi"
-    elif [[ "$arch" == "i686" ]];     then local host="i686-linux-android"
-    elif [[ "$arch" == "riscv64" ]];  then local host="riscv64-linux-android"
-    elif [[ "$arch" == "x86_64" ]];   then local host="x86_64-linux-android"
-    fi
-
+  elif [[ "$target_system" == "Android" ]]; then
     local sysroot="$ndk_path/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
     local arch_flags=""
     local target_os_flags="--target=$host$min_os"
@@ -221,7 +201,7 @@ create_framework() {
   exit_if_error
 
   # And sign the framework
-  codesign --timestamp -s $identity build/png.xcframework
+  codesign --timestamp -s $xcode_signing_identity build/png.xcframework
   exit_if_error
 }
 create_framework

@@ -317,6 +317,219 @@ PNGImage* fn_nullable PNGImage::_open(const _LoadInfo& info) {
 }
 
 
+long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullable * fn_nullable outData fn_noescape, long* fn_nullable outSize fn_noescape, WriteSettings settings) {
+    int colorType;
+    switch (_numComponents) {
+        case 1: colorType = PNG_COLOR_TYPE_GRAY; break;
+        case 2: colorType = PNG_COLOR_TYPE_GRAY_ALPHA; break;
+        case 3: colorType = PNG_COLOR_TYPE_RGB; break;
+        case 4: colorType = PNG_COLOR_TYPE_RGB_ALPHA; break;
+        default:
+            return 3;
+    }
+    
+    if (_width <= 0 || _height <= 0) {
+        return 3;
+    }
+    
+    if (_bitsPerComponent != 8 && _bitsPerComponent != 16) {
+        return 3;
+    }
+    
+    struct _writer {
+        const char* fn_nonnull path;
+        FILE* file;
+        
+        void* fn_nullable * fn_nullable outData;
+        long* fn_nullable outSize;
+        png_bytep memory;
+        png_size_t memorySize;
+        png_size_t memoryCapacity;
+        bool releaseMemoryOnCleanup;
+        
+        
+        ~_writer() {
+            cleanup();
+        }
+        
+        
+        void cleanup() {
+            if (file) {
+                std::fclose(file);
+                file = nullptr;
+            }
+            
+            if (releaseMemoryOnCleanup && memory) {
+                delete [] memory;
+                memory = nullptr;
+            }
+        }
+        
+        
+        bool append(const png_bytep data, png_size_t size) {
+            if (size == 0) {
+                return true;
+            }
+            
+            if (memorySize > PNG_SIZE_MAX - size) {
+                return false;
+            }
+            
+            auto requiredSize = memorySize + size;
+            if (requiredSize > memoryCapacity) {
+                auto newCapacity = memoryCapacity == 0 ? static_cast<png_size_t>(4096) : memoryCapacity;
+                while (newCapacity < requiredSize) {
+                    if (newCapacity > PNG_SIZE_MAX / 2) {
+                        newCapacity = requiredSize;
+                        break;
+                    }
+                    newCapacity *= 2;
+                }
+                
+                auto newMemory = new png_byte[newCapacity];
+                if (memory) {
+                    std::memcpy(newMemory, memory, memorySize);
+                    delete [] memory;
+                }
+                memory = newMemory;
+                memoryCapacity = newCapacity;
+            }
+            
+            std::memcpy(memory + memorySize, data, size);
+            memorySize = requiredSize;
+            return true;
+        }
+        
+        
+        static void pngErrorCallback(png_structp, png_const_charp) {
+            //
+        }
+        
+        static void pngWarningCallback(png_structp, png_const_charp) {
+            //
+        }
+        
+        static void writeData(png_structp png_ptr, png_bytep data, size_t size) {
+            auto writer = reinterpret_cast<_writer*>(png_get_io_ptr(png_ptr));
+            if (writer->append(data, size) == false) {
+                png_error(png_ptr, "Could not allocate PNG output buffer");
+            }
+        }
+        
+        static void outputFlush(png_structp) {
+            // No buffered state to flush for memory output.
+        }
+    };
+    auto usePath = path != nullptr;
+    auto writer = _writer {
+        .path = path,
+        .file = nullptr,
+        .outData = outData,
+        .outSize = outSize,
+        .memory = nullptr,
+        .memorySize = 0,
+        .memoryCapacity = 0,
+        .releaseMemoryOnCleanup = true
+    };
+    
+    if (usePath) {
+        writer.file = std::fopen(path, "wb");
+        if (writer.file == nullptr) {
+            return 1;
+        }
+    }
+    
+    png_voidp pngError = nullptr;
+    //png_create_write_struct_2(PNG_LIBPNG_VER_STRING, pngError, _writer::pngErrorCallback, _writer::pngWarningCallback, nullptr, malloc, free);
+    auto png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, pngError, _writer::pngErrorCallback, _writer::pngWarningCallback);
+    if (!png_ptr) {
+        return 4;
+    }
+    
+    auto info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_write_struct(&png_ptr, NULL);
+        return 4;
+    }
+    
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return 4;
+    }
+    
+    if (usePath) {
+        png_init_io(png_ptr, writer.file);
+    }
+    else {
+        if (outData == nullptr || outSize == nullptr) {
+            png_destroy_write_struct(&png_ptr, &info_ptr);
+            return 2;
+        }
+        
+        *outData = nullptr;
+        *outSize = 0;
+        png_set_write_fn(png_ptr, &writer, _writer::writeData, _writer::outputFlush);
+    }
+    
+    constexpr float highestCompressionLevel = 9;
+    auto compressionLevel = static_cast<int>(settings.compressionLevel * highestCompressionLevel);
+    if (compressionLevel < 0) {
+        compressionLevel = 0;
+    }
+    else if (compressionLevel > 9) {
+        compressionLevel = 9;
+    }
+    png_set_compression_level(png_ptr, compressionLevel);
+    
+    png_set_IHDR(png_ptr,
+                 info_ptr,
+                 static_cast<png_uint_32>(_width),
+                 static_cast<png_uint_32>(_height),
+                 static_cast<int>(_bitsPerComponent),
+                 colorType,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_BASE,
+                 PNG_FILTER_TYPE_BASE);
+    
+    if (_sRGB) {
+        png_set_sRGB(png_ptr, info_ptr, PNG_sRGB_INTENT_PERCEPTUAL);
+    }
+    else if (_iccData && _iccDataLength > 0) {
+        png_set_iCCP(png_ptr,
+                     info_ptr,
+                     static_cast<png_const_charp>("ICC Profile"),
+                     PNG_COMPRESSION_TYPE_BASE,
+                     reinterpret_cast<png_const_bytep>(_iccData),
+                     static_cast<png_uint_32>(_iccDataLength));
+    }
+    else if (_gamma > 0) {
+        png_set_gAMA(png_ptr, info_ptr, static_cast<double>(_gamma));
+    }
+    
+    png_write_info(png_ptr, info_ptr);
+    
+    auto rowSize = static_cast<png_size_t>(getBitsPerRow());
+    for (long rowIndex = 0; rowIndex < _height; rowIndex++) {
+        auto row = reinterpret_cast<png_const_bytep>(_contents + rowSize * rowIndex);
+        png_write_row(png_ptr, row);
+    }
+    
+    png_write_end(png_ptr, info_ptr);
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    
+    if (!usePath) {
+        *outData = writer.memory;
+        *outSize = static_cast<long>(writer.memorySize);
+        writer.memory = nullptr;
+        writer.memorySize = 0;
+        writer.memoryCapacity = 0;
+        writer.releaseMemoryOnCleanup = false;
+    }
+    
+    return 0;
+}
+
+
 PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) SWIFT_RETURNS_RETAINED {
     return _open({
         .usePath = true,
@@ -325,12 +538,22 @@ PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) SW
 }
 
 
-PNGImage* fn_nullable PNGImage::open(const void* fn_nonnull buffer fn_noescape, long bufferSize) SWIFT_RETURNS_RETAINED {
+PNGImage* fn_nullable PNGImage::open(const void* fn_nonnull buffer fn_noescape fn_counted_by(bufferSize), long bufferSize) SWIFT_RETURNS_RETAINED {
     return _open({
         .usePath = false,
         .buffer = buffer,
         .bufferSize = bufferSize
     });
+}
+
+
+long PNGImage::write(void* fn_nullable * fn_nonnull outData fn_noescape, long* fn_nonnull outSize fn_noescape, WriteSettings settings) {
+    return _write(nullptr, outData, outSize, settings);
+}
+
+
+long PNGImage::write(const char* fn_nonnull path fn_noescape, WriteSettings settings) {
+    return _write(path, nullptr, nullptr, settings);
 }
 
 
@@ -382,6 +605,30 @@ bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape, long buffer
         .buffer = buffer,
         .bufferSize = bufferSize
     });
+}
+
+
+PNGImage* fn_nonnull PNGImage::create(const char* fn_nonnull contents fn_noescape,
+                                      long width, long height,
+                                      long numComponents, long bitsPerComponent,
+                                      bool sRGB, float gamma,
+                                      const char* fn_nullable iccData fn_noescape, long iccDataLength) {
+    auto bytesPerComponent = bitsPerComponent / 8;
+    auto contentsSize = width * height * numComponents * bytesPerComponent;
+    auto contentsCopy = new char[contentsSize];
+    std::memcpy(contentsCopy, contents, contentsSize);
+    
+    char* iccDataCopy = nullptr;
+    if (iccData) {
+        iccDataCopy = new char[iccDataLength];
+        std::memcpy(iccDataCopy, iccData, iccDataLength);
+    }
+    
+    return new PNGImage(contentsCopy,
+                        width, height,
+                        numComponents, bitsPerComponent,
+                        sRGB, gamma,
+                        iccDataCopy, iccDataLength);
 }
 
 
