@@ -12,13 +12,14 @@
 #include <iostream>
 
 
-PNGImage::PNGImage(const char* fn_nonnull contents,
+PNGImage::PNGImage(std::byte* fn_nonnull contents, bool ownsContents,
                    long width, long height,
                    long numComponents, long bitsPerComponent,
                    bool sRGB, float gamma,
-                   char* fn_nullable iccData, long iccDataLength):
+                   void* fn_nullable iccData, bool ownsICCData, long iccDataLength):
 _referenceCounter(1),
 _contents(contents),
+_ownsContents(ownsContents),
 _width(width),
 _height(height),
 _numComponents(numComponents),
@@ -26,20 +27,21 @@ _bitsPerComponent(bitsPerComponent),
 _sRGB(sRGB),
 _gamma(gamma),
 _iccData(iccData),
+_ownsICCData(ownsICCData),
 _iccDataLength(iccDataLength) {
-    printf("Glamorous hieee\n");
+    //printf("Glamorous hieee\n");
 }
 
 
 PNGImage::~PNGImage() {
-    printf("Glamorous byeee\n");
-    
-    if (_iccData) {
-        delete [] _iccData;
+    //printf("Glamorous byeee\n");
+
+    if (_iccData && _ownsICCData) {
+        std::free(_iccData);
     }
     
-    if (_contents) {
-        delete [] _contents;
+    if (_contents && _ownsContents) {
+        std::free(_contents);
     }
 }
 
@@ -245,7 +247,7 @@ PNGImage* fn_nullable PNGImage::_open(const _LoadInfo& info) {
     // Embed transparency into image data if there is a tRNS block
     if (png_get_valid(png, startInfo, PNG_INFO_tRNS)) {
         png_set_tRNS_to_alpha(png);
-        colorType = (int)png_get_color_type(png, startInfo);
+        //colorType = (int)png_get_color_type(png, startInfo);
     }
         
     // Check if image is explicitly marked as sRGB
@@ -259,7 +261,7 @@ PNGImage* fn_nullable PNGImage::_open(const _LoadInfo& info) {
     }
     
     // Check if there is an ICC profile
-    char* iccData = nullptr;
+    void* iccData = nullptr;
     long iccDataLength = 0;
     if (isSRGB == false) {
         png_charp name;
@@ -272,9 +274,9 @@ PNGImage* fn_nullable PNGImage::_open(const _LoadInfo& info) {
                 if (name) {
                     printf("Color space: %s\n", name);
                 }
-                iccData = new char[profile_len];
+                iccData = std::malloc(profile_len);
                 iccDataLength = static_cast<long>(profile_len);
-                memcpy(iccData, profile_data, profile_len);
+                std::memcpy(iccData, profile_data, profile_len);
             } else {
                 printf("Unsupported ICC compression type %d\n", compression_type);
             }
@@ -304,20 +306,20 @@ PNGImage* fn_nullable PNGImage::_open(const _LoadInfo& info) {
     auto rowPointers = png_get_rows(png, startInfo);
     auto rowSize = numChannels * bitDepth * width / 8;
     auto imageSize = static_cast<long>(rowSize * height);
-    auto data = new char[imageSize];
+    auto data = reinterpret_cast<std::byte*>(std::malloc(imageSize));
     
     for (auto rowIndex = 0; rowIndex < height; rowIndex++) {
         auto row = rowPointers[rowIndex];
-        memcpy(data + rowSize * rowIndex, row, rowSize);
+        std::memcpy(data + rowSize * rowIndex, row, rowSize);
     }
     
     png_destroy_read_struct(&png, &startInfo, &endInfo);
     
-    return new PNGImage(data, width, height, numChannels, bitDepth, isSRGB, static_cast<float>(gamma), iccData, iccDataLength);
+    return new PNGImage(data, true, width, height, numChannels, bitDepth, isSRGB, static_cast<float>(gamma), iccData, true, iccDataLength);
 }
 
 
-long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullable * fn_nullable outData fn_noescape, long* fn_nullable outSize fn_noescape, WriteSettings settings) {
+long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullable * fn_nullable outData fn_noescape, long* fn_nullable outSize fn_noescape, float compressionLevel) {
     int colorType;
     switch (_numComponents) {
         case 1: colorType = PNG_COLOR_TYPE_GRAY; break;
@@ -360,7 +362,7 @@ long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullabl
             }
             
             if (releaseMemoryOnCleanup && memory) {
-                delete [] memory;
+                std::free(memory);
                 memory = nullptr;
             }
         }
@@ -371,7 +373,7 @@ long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullabl
                 return true;
             }
             
-            if (memorySize > PNG_SIZE_MAX - size) {
+            if (memorySize > PNG_SIZE_MAX - size) [[unlikely]] {
                 return false;
             }
             
@@ -386,10 +388,10 @@ long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullabl
                     newCapacity *= 2;
                 }
                 
-                auto newMemory = new png_byte[newCapacity];
+                auto newMemory = static_cast<png_byte*>(std::malloc(newCapacity));
                 if (memory) {
                     std::memcpy(newMemory, memory, memorySize);
-                    delete [] memory;
+                    std::free(memory);
                 }
                 memory = newMemory;
                 memoryCapacity = newCapacity;
@@ -452,10 +454,13 @@ long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullabl
         return 4;
     }
     
+    
+    // Handle errors here
     if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         return 4;
     }
+    
     
     if (usePath) {
         png_init_io(png_ptr, writer.file);
@@ -472,14 +477,14 @@ long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullabl
     }
     
     constexpr float highestCompressionLevel = 9;
-    auto compressionLevel = static_cast<int>(settings.compressionLevel * highestCompressionLevel);
-    if (compressionLevel < 0) {
-        compressionLevel = 0;
+    auto pngCompressionLevel = static_cast<int>(compressionLevel * highestCompressionLevel);
+    if (pngCompressionLevel < 0) {
+        pngCompressionLevel = 0;
     }
-    else if (compressionLevel > 9) {
-        compressionLevel = 9;
+    else if (pngCompressionLevel > 9) {
+        pngCompressionLevel = 9;
     }
-    png_set_compression_level(png_ptr, compressionLevel);
+    png_set_compression_level(png_ptr, pngCompressionLevel);
     
     png_set_IHDR(png_ptr,
                  info_ptr,
@@ -508,7 +513,7 @@ long PNGImage::_write(const char* fn_nullable path fn_noescape, void* fn_nullabl
     
     png_write_info(png_ptr, info_ptr);
     
-    auto rowSize = static_cast<png_size_t>(getBitsPerRow());
+    auto rowSize = static_cast<png_size_t>(getBytesPerRow());
     for (long rowIndex = 0; rowIndex < _height; rowIndex++) {
         auto row = reinterpret_cast<png_const_bytep>(_contents + rowSize * rowIndex);
         png_write_row(png_ptr, row);
@@ -547,13 +552,13 @@ PNGImage* fn_nullable PNGImage::open(const void* fn_nonnull buffer fn_noescape f
 }
 
 
-long PNGImage::write(void* fn_nullable * fn_nonnull outData fn_noescape, long* fn_nonnull outSize fn_noescape, WriteSettings settings) {
-    return _write(nullptr, outData, outSize, settings);
+long PNGImage::write(void* fn_nullable * fn_nonnull outData fn_noescape, long* fn_nonnull outSize fn_noescape, float compressionLevel) {
+    return _write(nullptr, outData, outSize, compressionLevel);
 }
 
 
-long PNGImage::write(const char* fn_nonnull path fn_noescape, WriteSettings settings) {
-    return _write(path, nullptr, nullptr, settings);
+long PNGImage::write(const char* fn_nonnull path fn_noescape, float compressionLevel) {
+    return _write(path, nullptr, nullptr, compressionLevel);
 }
 
 
@@ -599,7 +604,7 @@ bool PNGImage::checkIfPNG(const char* fn_nonnull path fn_noescape) {
 }
 
 
-bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape, long bufferSize) {
+bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape fn_counted_by(bufferSize), long bufferSize) {
     return _checkIfPNG({
         .usePath = false,
         .buffer = buffer,
@@ -608,27 +613,52 @@ bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape, long buffer
 }
 
 
-PNGImage* fn_nonnull PNGImage::create(const char* fn_nonnull contents fn_noescape,
+PNGImage* fn_nonnull PNGImage::create(const void* fn_nonnull contents fn_noescape,
                                       long width, long height,
                                       long numComponents, long bitsPerComponent,
                                       bool sRGB, float gamma,
-                                      const char* fn_nullable iccData fn_noescape, long iccDataLength) {
+                                      const void* fn_nullable iccData fn_noescape fn_counted_by(iccDataLength), long iccDataLength) {
     auto bytesPerComponent = bitsPerComponent / 8;
     auto contentsSize = width * height * numComponents * bytesPerComponent;
-    auto contentsCopy = new char[contentsSize];
+    auto contentsCopy = reinterpret_cast<std::byte*>(std::malloc(contentsSize));
     std::memcpy(contentsCopy, contents, contentsSize);
     
-    char* iccDataCopy = nullptr;
+    void* iccDataCopy = nullptr;
     if (iccData) {
-        iccDataCopy = new char[iccDataLength];
+        iccDataCopy = std::malloc(iccDataLength);
         std::memcpy(iccDataCopy, iccData, iccDataLength);
     }
     
-    return new PNGImage(contentsCopy,
+    return new PNGImage(contentsCopy, true,
                         width, height,
                         numComponents, bitsPerComponent,
                         sRGB, gamma,
-                        iccDataCopy, iccDataLength);
+                        iccDataCopy, true, iccDataLength);
+}
+
+
+PNGImage* fn_nonnull PNGImage::createTransferring(void* fn_nonnull contents fn_noescape, bool ownsContents,
+                                                  long width, long height,
+                                                  long numComponents, long bitsPerComponent,
+                                                  bool sRGB, float gamma,
+                                                  void* fn_nullable iccData fn_noescape fn_counted_by(iccDataLength), bool ownsICCData, long iccDataLength) {
+    return new PNGImage(reinterpret_cast<std::byte*>(contents), ownsContents,
+                        width, height,
+                        numComponents, bitsPerComponent,
+                        sRGB, gamma,
+                        iccData, ownsICCData, iccDataLength);
+}
+
+
+void* fn_nullable PNGImage::Unsafe::transferContentsOwnership(PNGImage* fn_nonnull png fn_noescape) {
+    png->_ownsContents = false;
+    return png->_contents;
+}
+
+
+void* fn_nullable PNGImage::Unsafe::transferICCDataOwnership(PNGImage* fn_nonnull png fn_noescape) {
+    png->_ownsICCData = false;
+    return png->_iccData;
 }
 
 

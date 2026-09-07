@@ -62,10 +62,8 @@ public extension PNGImage {
     
     
     func write(to path: String, compressionLevel: Float = 0.5) -> Int {
-        let settings = WriteSettings(compressionLevel: compressionLevel)
-        
         return path.withCString { cString in
-            return __writeUnsafe(cString, settings)
+            return __writeUnsafe(cString, compressionLevel)
         }
     }
     
@@ -102,27 +100,3 @@ public extension PNGImage {
 }
 
 #endif
-
-
-@available(macOS 13.3, iOS 16.4, tvOS 16.4, watchOS 9.4, visionOS 1.0, *)
-func readSomeInfos(path: String) {
-    // Open an image
-    let png = PNGImage.open(path: path)!
-    
-    // Check if it's an sRGB image
-    let isSRGB = png.issrgb
-    // do something...
-    
-    // Get ICC profile data
-    let icc = png.iccData
-    // do something...
-}
-
-@available(macOS 13.3, iOS 16.4, tvOS 16.4, watchOS 9.4, visionOS 1.0, *)
-func saveRGBA8Image(contents: Data, width: Int, height: Int, outPath: String) -> Int {
-    // Create an image
-    let png = PNGImage.from(contents, width: width, height: height, numComponents: 4, bitsPerComponent: 8)!
-    
-    // Save image with the middle compression level
-    return png.write(to: outPath, compressionLevel: 0.5)
-}
