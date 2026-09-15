@@ -543,7 +543,7 @@ PNGImage* fn_nullable PNGImage::open(const char* fn_nonnull path fn_noescape) SW
 }
 
 
-PNGImage* fn_nullable PNGImage::open(const void* fn_nonnull buffer fn_noescape fn_counted_by(bufferSize), long bufferSize) SWIFT_RETURNS_RETAINED {
+PNGImage* fn_nullable PNGImage::open(const void* fn_nonnull buffer fn_noescape fn_sized_by(bufferSize), long bufferSize) SWIFT_RETURNS_RETAINED {
     return _open({
         .usePath = false,
         .buffer = buffer,
@@ -604,7 +604,7 @@ bool PNGImage::checkIfPNG(const char* fn_nonnull path fn_noescape) {
 }
 
 
-bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape fn_counted_by(bufferSize), long bufferSize) {
+bool PNGImage::checkIfPNG(const void* fn_nonnull buffer fn_noescape fn_sized_by(bufferSize), long bufferSize) {
     return _checkIfPNG({
         .usePath = false,
         .buffer = buffer,
@@ -617,7 +617,7 @@ PNGImage* fn_nonnull PNGImage::create(const void* fn_nonnull contents fn_noescap
                                       long width, long height,
                                       long numComponents, long bitsPerComponent,
                                       bool sRGB, float gamma,
-                                      const void* fn_nullable iccData fn_noescape fn_counted_by(iccDataLength), long iccDataLength) {
+                                      const void* fn_nullable iccData fn_noescape fn_sized_by(iccDataLength), long iccDataLength) {
     auto bytesPerComponent = bitsPerComponent / 8;
     auto contentsSize = width * height * numComponents * bytesPerComponent;
     auto contentsCopy = reinterpret_cast<std::byte*>(std::malloc(contentsSize));
@@ -641,7 +641,7 @@ PNGImage* fn_nonnull PNGImage::createTransferring(void* fn_nonnull contents fn_n
                                                   long width, long height,
                                                   long numComponents, long bitsPerComponent,
                                                   bool sRGB, float gamma,
-                                                  void* fn_nullable iccData fn_noescape fn_counted_by(iccDataLength), bool ownsICCData, long iccDataLength) {
+                                                  void* fn_nullable iccData fn_noescape fn_sized_by(iccDataLength), bool ownsICCData, long iccDataLength) {
     return new PNGImage(reinterpret_cast<std::byte*>(contents), ownsContents,
                         width, height,
                         numComponents, bitsPerComponent,

@@ -12,7 +12,7 @@ import Foundation
 @available(macOS 13.3, iOS 16.4, tvOS 16.4, watchOS 9.4, visionOS 1.0, *)
 public extension PNGImage {
     static func open(path: String) -> PNGImage? {
-        unsafe path.withCString { pathCString in
+        path.withCString { pathCString in
             unsafe PNGImage.__openUnsafe(path: pathCString)
         }
     }

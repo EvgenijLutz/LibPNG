@@ -57,6 +57,10 @@
 #define fn_counted_by(__member__) __counted_by(__member__)
 #endif
 
+#ifndef fn_sized_by
+#define fn_sized_by(__member__) __sized_by(__member__)
+#endif
+
 #ifndef fn_lifetimebound
 #define fn_lifetimebound _LIBCPP_LIFETIMEBOUND
 #endif

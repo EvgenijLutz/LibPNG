@@ -72,7 +72,7 @@ public:
     /// Checks if a file at the specified `path` is a `png` image.
     static bool checkIfPNG(const char* fn_nonnull path fn_noescape);
     /// Checks if the specified `buffer` is a `png` image.
-    static bool checkIfPNG(const void* fn_nonnull buffer fn_noescape fn_counted_by(bufferSize), long bufferSize);
+    static bool checkIfPNG(const void* fn_nonnull buffer fn_noescape fn_sized_by(bufferSize), long bufferSize);
     
     
     /// Creates a png image from a memory buffer copy.
@@ -80,7 +80,7 @@ public:
                                        long width, long height,
                                        long numComponents, long bitsPerComponent,
                                        bool sRGB = true, float gamma = -1,  // Default to sRGB
-                                       const void* fn_nullable iccData fn_noescape fn_counted_by(iccDataLength) = nullptr, long iccDataLength = 0    // Default to no colour profile
+                                       const void* fn_nullable iccData fn_noescape fn_sized_by(iccDataLength) = nullptr, long iccDataLength = 0    // Default to no colour profile
                                        ) SWIFT_RETURNS_RETAINED SWIFT_NAME(init(_:_:_:_:_:_:_:_:_:));
     
     /// Creates a png image by referencing memory buffer for its contents and ICC profile (if specified) without copying them.
@@ -91,7 +91,7 @@ public:
                                                    long width, long height,
                                                    long numComponents, long bitsPerComponent,
                                                    bool sRGB = true, float gamma = -1,  // Default to sRGB
-                                                   void* fn_nullable iccData fn_noescape fn_counted_by(iccDataLength) = nullptr, bool ownsICCData = true, long iccDataLength = 0    // Default to no colour profile
+                                                   void* fn_nullable iccData fn_noescape fn_sized_by(iccDataLength) = nullptr, bool ownsICCData = true, long iccDataLength = 0    // Default to no colour profile
     ) SWIFT_RETURNS_RETAINED SWIFT_NAME(__createUnownedUnsafe(_:_:_:_:_:_:_:_:_:_:_:));
     
     /// Loads a png file at the specified `path`.
@@ -104,7 +104,7 @@ public:
     ///
     /// - Returns: a valid ``PNGImage`` if the image was successfully loaded, otherwise false.
     [[nodiscard("Don't forget to release the object using the PNGImageRelease function")]]
-    static PNGImage* fn_nullable open(const void* fn_nonnull buffer fn_noescape fn_counted_by(bufferSize), long bufferSize) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(buffer:size:));
+    static PNGImage* fn_nullable open(const void* fn_nonnull buffer fn_noescape fn_sized_by(bufferSize), long bufferSize) SWIFT_RETURNS_RETAINED SWIFT_NAME(__openUnsafe(buffer:size:));
     
     /// Writes a `png` compressed image into a buffer.
     /// - Parameter outData: pointer to output compressed data contents.
