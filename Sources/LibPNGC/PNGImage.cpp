@@ -5,11 +5,12 @@
 //  Created by Evgenij Lutz on 31.10.25.
 //
 
+#define _LIBCPP_REMOVE_TRANSITIVE_INCLUDES
 #include <LibPNGC/PNGImage.hpp>
+#include <cstdlib>
+#include <cstdio>
+#include <math.h>
 #include <png.h>
-#include <LibPNGC/LibPNGC.hpp>
-#include <stdio.h>
-#include <iostream>
 
 
 PNGImage::PNGImage(std::byte* fn_nonnull contents, bool ownsContents,

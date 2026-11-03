@@ -8,6 +8,7 @@
 #pragma once
 
 #include <LibPNGC/Common.hpp>
+#include <atomic>
 
 
 enum class PNGImageError: long {
@@ -121,7 +122,7 @@ public:
     long write(const char* fn_nonnull path fn_noescape, float compressionLevel) SWIFT_NAME(__writeUnsafe(_:_:));
     
     //std::span<std::byte> getData() lifetimebound SWIFT_COMPUTED_PROPERTY;
-    const void* fn_nonnull getContents() fn_lifetimebound SWIFT_COMPUTED_PROPERTY { return _contents; }
+    const void* fn_nonnull getContents() /*fn_lifetimebound*/ SWIFT_COMPUTED_PROPERTY { return _contents; }
     long getDataSize() const SWIFT_COMPUTED_PROPERTY { return (_bitsPerComponent / 8) * _numComponents * _width * _height; }
     long getWidth() const SWIFT_COMPUTED_PROPERTY { return _width; }
     long getHeight() const SWIFT_COMPUTED_PROPERTY { return _height; }
@@ -133,7 +134,7 @@ public:
     bool getIsSRGB() const SWIFT_COMPUTED_PROPERTY { return _sRGB; }
     float getGamma() const SWIFT_COMPUTED_PROPERTY { return _gamma; }
     
-    const void* fn_nullable getICCPData() fn_lifetimebound SWIFT_NAME(__getICCPDataUnsafe()) { return _iccData; };
+    const void* fn_nullable getICCPData() /*fn_lifetimebound*/ SWIFT_NAME(__getICCPDataUnsafe()) { return _iccData; };
     long getICCPDataLength() SWIFT_NAME(_getICCPDataLengthUnsafe()) { return _iccDataLength; };
     
     struct Unsafe final {

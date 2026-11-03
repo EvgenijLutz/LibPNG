@@ -9,7 +9,7 @@ Precompiled [libpng](https://github.com/pnggroup/libpng) library for all Apple p
 Add the following dependency to your Package.swift:
 
 ```Swift
-.package(url: "https://github.com/EvgenijLutz/LibPNG.git", from: "1.6.58")
+.package(url: "https://github.com/EvgenijLutz/LibPNG.git", from: "1.6.59")
 ```
 
 And you're good to go!
@@ -97,7 +97,7 @@ func saveRGBA8Image(contents: Data, width: Int, height: Int, outPath: String) ->
 Support binaries for other platforms beyond Apple.
 
 # Build
-Built with `libpng 1.6.58` and `Xcode 26.6`.
+Built with `libpng 1.6.59` and `Xcode 27.2`.
 
 Download [libpng source code archive](https://github.com/pnggroup/libpng/releases/tag/v1.6.58), extract it and copy the `build-apple.sh` and `common.sh` files from the `LibPNG/Resources/Build` into the `libpng` directory:
 ```bash
@@ -105,7 +105,7 @@ cp Path/To/LibPNG/Resources/Build/build-apple.sh libpng/build-apple.sh
 cp Path/To/LibPNG/Resources/Build/common.sh libpng/common.sh
 ```
 
-In the `build-apple.sh` script, change the `source_name` variable to the name of the folder with extracted source code (for instance, `libpng-1.6.58` in our case). In the `common.sh` script, set the `xcode_signing_identity` and `ndk_path` variables to your xcode signing identity (instruction how to get it in the comments) and Android NDK path.
+In the `build-apple.sh` script, change the `source_name` variable to the name of the folder with extracted source code (for instance, `libpng-1.6.59` in our case). In the `common.sh` script, set the `xcode_signing_identity` and `ndk_path` variables to your xcode signing identity (instruction how to get it in the comments) and Android NDK path.
 
 And then, execute the script:
 ```bash
